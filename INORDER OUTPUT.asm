@@ -1,0 +1,63 @@
+.MODEL SMALL
+.STACK 100H
+.DATA                
+INPUT_MSG DB 'INPUT : $'
+OUTPUT_MSG DB 'OUTPUT : $'
+ENTER DB 0DH,0AH,24H
+.CODE
+MAIN PROC 
+    
+    MOV AX, @DATA
+    MOV DS, AX
+    
+    XOR CL, CL
+INPUT_PRE_SEGMENT:
+    MOV AH, 9
+    LEA DX, INPUT_MSG
+    INT 21H
+        JMP INPUT_SEGMENT
+INPUT_SEGMENT:
+    XOR AX, AX
+    XOR BX, BX
+    
+    MOV AH, 1
+    INT 21H
+    
+    MOV BL, AL
+    CMP BL, 0DH
+        JE OUTPUT_PRE_SEGMENT
+   
+    PUSH BX
+    
+    INC CL
+    
+        JMP INPUT_SEGMENT
+OUTPUT_PRE_SEGMENT:
+    MOV AH, 9
+    LEA DX, ENTER
+    INT 21H      
+    MOV AH, 9
+    LEA DX, OUTPUT_MSG
+    INT 21H
+        JMP OUTPUT_SEGMENT
+        
+OUTPUT_SEGMENT:
+    DEC CL
+              
+    XOR AX, AX          
+    XOR BX, BX
+    XOR DX, DX
+    
+    POP BX
+    
+    MOV AH, 2
+    MOV DL, BL
+    INT 21H
+    CMP CL, 0H
+        JE EXIT
+    JMP OUTPUT_SEGMENT
+EXIT:
+    MOV AH, 4CH
+    INT 21H
+    MAIN ENDP
+END MAIN
